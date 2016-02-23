@@ -14,7 +14,9 @@ aws.config.loadFromPath('./config/aws.json');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var port = process.env.PORT || 8080;
+app.use(express.static(__dirname + '/public'));
+
+var port = process.env.PORT || 9761;
 var logError = function(message) {
     console.error(moment().format() + ' - ' + message);
 }
@@ -30,7 +32,7 @@ app.use(function(req, res, next) {
     res.json({ message: 'No route'});
 });
 app.use(function(err, req, res, next) {
-    logError(err.inner.stack);
+    logError(err.inner ? err.inner.stack : err);
 
     res.status(err.status ? err.status : 500);
     res.json({ message: err.message });

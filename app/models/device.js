@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 
 var DeviceSchema = mongoose.Schema({
     gcmId: String,
+    deviceInternalId: String,
     osVersion: String,
     appVersion: String,
     type: { type: String, enum: ['ANDROID', 'IPHONE'] }

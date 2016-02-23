@@ -1,4 +1,6 @@
 var Map = require('../models/map');
+var Device = require('../models/device');
+
 module.exports = function(router) {
 
     function queryMapById(mapId, res, next) {
@@ -16,12 +18,7 @@ module.exports = function(router) {
 
     router.route('/device/:device_id/maps')
         .get(function(req, res, next) {
-            var query = {
-                deviceId: { $eq: req.params.device_id},
-                updatedAt: req.query.updatedAt ? { $gt: req.query.updatedAt } : { $ne: null }
-            };
-
-            Map.find(query, function(err, maps) {
+            Map.getMapsByDeviceId(req.params.device_id, req.query.updatedAt, function(err, maps) {
                 if (err) {
                     var error = new Error('Error querying maps');
                     error.inner = err;
@@ -39,7 +36,7 @@ module.exports = function(router) {
             Map(req.body).save(function(err, map) {
                 if (err) {
                     var error = new Error('Error saving map');
-                    err.inner = err;
+                    error.inner = err;
                     next(error);
                     return;
                 }

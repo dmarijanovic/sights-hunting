@@ -5,6 +5,8 @@ var Schema = mongoose.Schema;
 var MapLocationSchema = new Schema({
     timestampGps: Date,
     imagePath: String,
+    url: String,
+    thumbnailUrl: String,
     loc: {
         type: { type: String },
         coordinates: { type: [Number] }
@@ -12,6 +14,10 @@ var MapLocationSchema = new Schema({
     mapId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Map'
+    },
+    parentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MapLocation'
     }
 }, { timestamps: true });
 // typeKey: '$type' ???
@@ -29,10 +35,7 @@ MapLocationSchema.statics.fillFromRequestObject = function(mapLocation) {
                 mapLocation.longitude,
                 mapLocation.latitude
             ]
-        }
-        
-        mapLocation.mapId = mapLocation.map._id;
-        
+        }       
 }
 
 // define the index
