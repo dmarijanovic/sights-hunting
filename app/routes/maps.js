@@ -44,7 +44,21 @@ module.exports = function(router) {
                 res.json(map);
             });
         });
-        
+
+    router.route('/device/:device_id/maps/community')
+        .get(function(req, res, next) {
+            Map.communityMaps(req.params.device_id, function(err, maps) {
+                if (err) {
+                    var error = new Error('Error querying map');
+                    error.inner = err;
+                    next(error);
+                    return;
+                }
+
+                res.json(maps);
+            });
+        });
+
     router.route('/device/:device_id/maps/:map_id')
         .get(function(req, res, next) {
             queryMapById(req.params.map_id, res, next);

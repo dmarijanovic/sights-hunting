@@ -11,26 +11,46 @@ var MapSchema = new Schema({
     status: {type: String, enum: ['CREATED', 'OPEN', 'ACTIVE', 'ON_APPROVE', 'APPROVED']}
 }, { timestamps: true });
 
-
-MapSchema.statics.getMapsByDeviceId = function(device_id, updatedAt, cb) {
-    var Device = this.model('Device'), Map = this.model('Map');
+var getDeviceFromSameUser = function(context, device_id, cb) {
+    var Device = context.model('Device');
     Device.findById(device_id, function(err, device) {
         if (err) throw err;
 
-       Device.find( { deviceInternalId: { $eq: device.deviceInternalId } }, function(err, devices) {
-           if (err) throw err;
+        Device.find( { deviceInternalId: { $eq: device.deviceInternalId } }, function(err, devices) {
+            if (err) throw err;
 
-           var deviceIds = u.map(devices, function(device) {
-              return device._id; 
+            var deviceIds = u.map(devices, function(device) {
+                return mongoose.Types.ObjectId(device._id);
            });
 
-            var query = {
-                deviceId: { $in: deviceIds},
-                updatedAt: updatedAt ? { $gt: updatedAt } : { $ne: null }
-            };
+           cb(deviceIds);
+        });
+    });
+};
 
-            Map.find(query, cb);
-       });
+MapSchema.statics.getMapsByDeviceId = function(device_id, updatedAt, cb) {
+    var Map = this.model('Map');
+    getDeviceFromSameUser(this, device_id, function(deviceIds) {
+
+        var query = {
+            deviceId: { $in: deviceIds},
+            updatedAt: updatedAt ? { $gt: updatedAt } : { $ne: null }
+        };
+
+        Map.find(query, cb);
+    });
+};
+
+MapSchema.statics.communityMaps = function(device_id, cb) {
+    var Map = this.model('Map');
+    getDeviceFromSameUser(this, device_id, function(deviceIds) {
+
+        var query = {
+            deviceId: { $nin: deviceIds },
+            status: 'ON_APPROVE', 
+        }
+
+        Map.find(query, cb);
     });
 };
 
