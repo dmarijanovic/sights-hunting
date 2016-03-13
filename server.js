@@ -4,9 +4,15 @@ var bodyParser = require('body-parser');
 var moment = require('moment');
 var aws = require('aws-sdk');
 
+var env = process.env.NODE_ENV
+console.log('Environment set to: ' + env);
 // MongoDb config
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/sighthunting');
+if (env == 'development') {
+    mongoose.connect('mongodb://localhost/sighthunting');
+} else {
+    mongoose.connect(process.env.MONGOLAB_URI);
+}
 
 // AWS config
 aws.config.loadFromPath('./config/aws.json');
