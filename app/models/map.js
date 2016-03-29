@@ -15,6 +15,12 @@ var getDeviceFromSameUser = function(context, device_id, cb) {
     var Device = context.model('Device');
     Device.findById(device_id, function(err, device) {
         if (err) throw err;
+        console.log('error je ', device)
+        // no device found, return error
+        if (!device) {
+            cb(new Error('No device found'));
+            return;
+        } 
 
         Device.find( { deviceInternalId: { $eq: device.deviceInternalId } }, function(err, devices) {
             if (err) throw err;
@@ -23,7 +29,7 @@ var getDeviceFromSameUser = function(context, device_id, cb) {
                 return mongoose.Types.ObjectId(device._id);
            });
 
-           cb(deviceIds);
+           cb(null, deviceIds);
         });
     });
 };
@@ -43,7 +49,8 @@ MapSchema.statics.getMapsByDeviceId = function(device_id, updatedAt, cb) {
 
 MapSchema.statics.communityMaps = function(device_id, cb) {
     var Map = this.model('Map');
-    getDeviceFromSameUser(this, device_id, function(deviceIds) {
+    getDeviceFromSameUser(this, device_id, function(err, deviceIds) {
+        if (err) throw err;
 
         var query = {
             deviceId: { $nin: deviceIds },
